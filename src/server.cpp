@@ -192,7 +192,7 @@ std::string handleCommand(const std::string& rawLine, Session& session, Timetabl
 
     if (command == "add") {
         if (!session.isAdmin) {
-            return "ERROR ადმინისტратор权限需要登录\n";
+            return "ERROR Admin login required\n";
         }
         auto fields = split(args, '|');
         if (fields.size() != 7) {
@@ -210,7 +210,7 @@ std::string handleCommand(const std::string& rawLine, Session& session, Timetabl
 
     if (command == "update") {
         if (!session.isAdmin) {
-            return "ERROR 管理员权限需要登录\n";
+            return "ERROR Admin login required\n";
         }
         std::istringstream input(args);
         std::string code;
@@ -232,7 +232,7 @@ std::string handleCommand(const std::string& rawLine, Session& session, Timetabl
 
     if (command == "delete") {
         if (!session.isAdmin) {
-            return "ERROR 管理员权限需要登录\n";
+            return "ERROR Admin login required\n";
         }
         if (args.empty()) {
             return "ERROR Usage: DELETE <code>\n";
