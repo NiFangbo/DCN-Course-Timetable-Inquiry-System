@@ -1,4 +1,0 @@
-/home/runner/work/DCN-Course-Timetable-Inquiry-System/DCN-Course-Timetable-Inquiry-System/build/CMakeFiles/timetable_server.dir
-/home/runner/work/DCN-Course-Timetable-Inquiry-System/DCN-Course-Timetable-Inquiry-System/build/CMakeFiles/timetable_client.dir
-/home/runner/work/DCN-Course-Timetable-Inquiry-System/DCN-Course-Timetable-Inquiry-System/build/CMakeFiles/edit_cache.dir
-/home/runner/work/DCN-Course-Timetable-Inquiry-System/DCN-Course-Timetable-Inquiry-System/build/CMakeFiles/rebuild_cache.dir

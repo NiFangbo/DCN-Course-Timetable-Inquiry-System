@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/timetable_server.dir/link.d CMakeFiles/timetable_server.dir/src/server.cpp.o CMakeFiles/timetable_server.dir/src/database.cpp.o -o timetable_server  -lws2_32
