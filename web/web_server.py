@@ -189,9 +189,9 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         course = payload.get("course", {})
         fields = []
         for key in ["code", "title", "section", "instructor", "time", "classroom", "semester"]:
-            value, field_error = normalize_text(course.get(key), f"{key}", allow_pipe=False)
-            if field_error:
-                return {"ok": False, "message": field_error}
+            value, error = normalize_text(course.get(key), f"{key}", allow_pipe=False)
+            if error:
+                return {"ok": False, "message": error}
             fields.append(value)
         command = "ADD " + "|".join(fields)
         return self._run_admin_command(username, password, command)
