@@ -87,7 +87,12 @@ def parse_course(payload: str) -> Optional[Dict[str, str]]:
     }
 
 
-def normalize_text(value: Any, field: str, allow_pipe: bool = True) -> Tuple[Optional[str], Optional[str]]:
+def normalize_text(
+    value: Any,
+    field: str,
+    allow_pipe: bool = True,
+    allow_space: bool = True,
+) -> Tuple[Optional[str], Optional[str]]:
     if not isinstance(value, str):
         return None, f"{field} 必须是字符串"
     text = value.strip()
@@ -95,6 +100,8 @@ def normalize_text(value: Any, field: str, allow_pipe: bool = True) -> Tuple[Opt
         return None, f"{field} 不能为空"
     if "\n" in text or "\r" in text:
         return None, f"{field} 不能包含换行"
+    if not allow_space and any(char.isspace() for char in text):
+        return None, f"{field} 不能包含空格"
     if not allow_pipe and "|" in text:
         return None, f"{field} 不能包含 |"
     return text, None
@@ -189,16 +196,18 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         course = payload.get("course", {})
         fields = []
         labeled_fields = [
-            ("code", "课程代码"),
-            ("title", "课程名称"),
-            ("section", "班级"),
-            ("instructor", "教师"),
-            ("time", "时间"),
-            ("classroom", "教室"),
-            ("semester", "学期"),
+            ("code", "课程代码", False),
+            ("title", "课程名称", True),
+            ("section", "班级", True),
+            ("instructor", "教师", True),
+            ("time", "时间", True),
+            ("classroom", "教室", True),
+            ("semester", "学期", True),
         ]
-        for key, label in labeled_fields:
-            value, error = normalize_text(course.get(key), label, allow_pipe=False)
+        for key, label, allow_space in labeled_fields:
+            value, error = normalize_text(
+                course.get(key), label, allow_pipe=False, allow_space=allow_space
+            )
             if error:
                 return {"ok": False, "message": error}
             fields.append(value)
@@ -209,10 +218,10 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         username, password, error = self._read_admin(payload)
         if error:
             return {"ok": False, "message": error}
-        code, error = normalize_text(payload.get("code"), "课程代码")
+        code, error = normalize_text(payload.get("code"), "课程代码", allow_space=False)
         if error:
             return {"ok": False, "message": error}
-        field, error = normalize_text(payload.get("field"), "字段")
+        field, error = normalize_text(payload.get("field"), "字段", allow_space=False)
         if error:
             return {"ok": False, "message": error}
         if field.lower() not in ALLOWED_UPDATE_FIELDS:
@@ -227,17 +236,17 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         username, password, error = self._read_admin(payload)
         if error:
             return {"ok": False, "message": error}
-        code, error = normalize_text(payload.get("code"), "课程代码")
+        code, error = normalize_text(payload.get("code"), "课程代码", allow_space=False)
         if error:
             return {"ok": False, "message": error}
         return self._run_admin_command(username, password, f"DELETE {code}")
 
     def _read_admin(self, payload: Dict[str, Any]) -> Tuple[str, str, Optional[str]]:
         admin = payload.get("admin", {})
-        username, error = normalize_text(admin.get("username"), "管理员账号")
+        username, error = normalize_text(admin.get("username"), "管理员账号", allow_space=False)
         if error:
             return "", "", error
-        password, error = normalize_text(admin.get("password"), "管理员密码")
+        password, error = normalize_text(admin.get("password"), "管理员密码", allow_space=False)
         if error:
             return "", "", error
         return username, password, None

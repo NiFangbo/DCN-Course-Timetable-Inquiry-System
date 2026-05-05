@@ -50,7 +50,7 @@ async function apiPost(path, payload) {
   try {
     data = await response.json();
   } catch (error) {
-    throw new Error("响应不是有效的 JSON");
+    throw new Error(`响应不是有效的 JSON: ${error.message}`);
   }
   if (!response.ok || data.ok === false) {
     throw new Error(data.message || `请求失败 (${response.status})`);
