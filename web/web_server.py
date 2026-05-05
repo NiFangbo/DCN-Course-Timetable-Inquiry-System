@@ -188,8 +188,17 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             return {"ok": False, "message": error}
         course = payload.get("course", {})
         fields = []
-        for key in ["code", "title", "section", "instructor", "time", "classroom", "semester"]:
-            value, error = normalize_text(course.get(key), f"{key}", allow_pipe=False)
+        labeled_fields = [
+            ("code", "课程代码"),
+            ("title", "课程名称"),
+            ("section", "班级"),
+            ("instructor", "教师"),
+            ("time", "时间"),
+            ("classroom", "教室"),
+            ("semester", "学期"),
+        ]
+        for key, label in labeled_fields:
+            value, error = normalize_text(course.get(key), label, allow_pipe=False)
             if error:
                 return {"ok": False, "message": error}
             fields.append(value)
