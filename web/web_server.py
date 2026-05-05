@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 MAX_BODY_BYTES = 64 * 1024
+DEFAULT_TIMEOUT = 5.0
 ALLOWED_UPDATE_FIELDS = {"title", "section", "instructor", "time", "classroom", "semester"}
 
 
@@ -39,7 +40,9 @@ class TimetableClient:
         with socket.create_connection((self._host, self._port), timeout=self._timeout) as sock:
             sock.settimeout(self._timeout)
             reader = SocketLineReader(sock)
-            reader.read_line()
+            welcome = reader.read_line()
+            if welcome is None:
+                return [{"ok": False, "message": "无法连接到服务器"} for _ in commands]
             results = []
             for command in commands:
                 sock.sendall((command + "\n").encode("utf-8"))
@@ -162,11 +165,11 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
     def _run_command(self, command: str) -> Dict[str, Any]:
-        client = TimetableClient(self._tcp_host, self._tcp_port, timeout=5.0)
+        client = TimetableClient(self._tcp_host, self._tcp_port, timeout=DEFAULT_TIMEOUT)
         return client.run_commands([command])[0]
 
     def _run_admin_command(self, username: str, password: str, command: str) -> Dict[str, Any]:
-        client = TimetableClient(self._tcp_host, self._tcp_port, timeout=5.0)
+        client = TimetableClient(self._tcp_host, self._tcp_port, timeout=DEFAULT_TIMEOUT)
         login_response, action_response = client.run_commands(
             [f"LOGIN {username} {password}", command]
         )
@@ -224,7 +227,8 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         field, error = normalize_text(payload.get("field"), "字段", allow_space=False)
         if error:
             return {"ok": False, "message": error}
-        if field.lower() not in ALLOWED_UPDATE_FIELDS:
+        field = field.lower()
+        if field not in ALLOWED_UPDATE_FIELDS:
             return {"ok": False, "message": "字段不支持"}
         value, error = normalize_text(payload.get("value"), "新值")
         if error:
