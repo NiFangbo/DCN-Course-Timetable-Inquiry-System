@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Timetable Management</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Timetable Management System</h1>
+            <p>Admin Mode - Full Access</p>
+        </header>
+
+        <!-- Query Section (same as user) -->
+        <div class="card">
+            <h2>Query Courses</h2>
+            <form id="query-form" class="grid">
+                <label>
+                    Query Type
+                    <select id="query-type">
+                        <option value="code">Course Code</option>
+                        <option value="instructor">Instructor</option>
+                        <option value="semester">Semester</option>
+                    </select>
+                </label>
+                <label>
+                    Keyword
+                    <input id="query-value" type="text" placeholder="e.g., COMP3003">
+                </label>
+                <div class="actions">
+                    <button type="submit">Search</button>
+                    <button type="button" id="list-all">List All</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Results</h2>
+            <div id="status" class="status"></div>
+            <div class="table-wrapper">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Title</th>
+                            <th>Section</th>
+                            <th>Instructor</th>
+                            <th>Time</th>
+                            <th>Classroom</th>
+                            <th>Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin Actions Section -->
+        <div class="card">
+            <h2>Admin Actions</h2>
+            <div id="admin-status" class="status"></div>
+
+            <!-- Add Course -->
+            <form id="add-form" class="card sub-card">
+                <h3>Add Course</h3>
+                <div class="grid">
+                    <label>Code<input id="add-code" type="text"></label>
+                    <label>Title<input id="add-title" type="text"></label>
+                    <label>Section<input id="add-section" type="text"></label>
+                    <label>Instructor<input id="add-instructor" type="text"></label>
+                    <label>Time<input id="add-time" type="text"></label>
+                    <label>Classroom<input id="add-classroom" type="text"></label>
+                    <label>Semester<input id="add-semester" type="text"></label>
+                </div>
+                <br>
+                <div class="actions">
+                    <button type="submit">Add</button>
+                </div>
+            </form>
+
+            <!-- Update Course -->
+            <form id="update-form" class="card sub-card">
+                <h3>Update Course</h3>
+                <div class="grid">
+                    <label>Code<input id="update-code" type="text"></label>
+                    <label>
+                        Field
+                        <select id="update-field">
+                            <option value="title">title</option>
+                            <option value="section">section</option>
+                            <option value="instructor">instructor</option>
+                            <option value="time">time</option>
+                            <option value="classroom">classroom</option>
+                            <option value="semester">semester</option>
+                        </select>
+                    </label>
+                    <label>New Value<input id="update-value" type="text"></label>
+                </div>
+                <br>
+                <div class="actions">
+                    <button type="submit">Update</button>
+                </div>
+            </form>
+
+            <!-- Delete Course -->
+            <form id="delete-form" class="card sub-card">
+                <h3>Delete Course</h3>
+                <div class="grid">
+                    <label>Code<input id="delete-code" type="text"></label>
+                </div>
+                <br>
+                <div class="actions">
+                    <button type="submit" class="danger">Delete</button>
+                </div>
+            </form>
+
+            <!-- Logout -->
+            <div class="actions">
+                <button id="logout-btn">Back to Selection</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

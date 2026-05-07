@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable Inquiry System</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Timetable Inquiry System</h1>
+            <p>Select your access mode</p>
+        </header>
+
+        <div class="card" id="user-card">
+            <h2>User Mode</h2>
+            <p>Query course schedules without login</p>
+            <button id="user-btn">Enter as User</button>
+        </div>
+
+        <div class="card" id="admin-card">
+            <h2>Admin Mode</h2>
+            <p>Manage courses with administrator account</p>
+            <button id="admin-btn">Enter as Admin</button>
+        </div>
+
+        <div class="card" id="login-card" style="display: none;">
+            <h2>Admin Login</h2>
+            <div id="login-status" class="status"></div>
+            <div class="grid">
+                <label>
+                    Username
+                    <input type="text" id="login-username" placeholder="admin">
+                </label>
+                <label>
+                    Password
+                    <input type="password" id="login-password" placeholder="password">
+                </label>
+            </div>
+            <br>
+            <div class="actions">
+                <button id="login-submit-btn">Login</button>
+                <button id="login-back-btn">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>

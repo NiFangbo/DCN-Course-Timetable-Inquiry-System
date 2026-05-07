@@ -115,6 +115,12 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         self._tcp_host = tcp_host
         self._tcp_port = tcp_port
         super().__init__(*args, **kwargs)
+        
+    def do_GET(self):
+        # Redirect root path to login.html
+        if self.path == "/" or self.path == "":
+            self.path = "/login.html"
+        return super().do_GET()
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
@@ -136,6 +142,8 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             response = self._handle_update(payload)
         elif parsed.path == "/api/delete":
             response = self._handle_delete(payload)
+        elif parsed.path == "/api/verify":
+            response = self._handle_verify(payload)
         else:
             self._send_json({"ok": False, "message": "未知接口"}, HTTPStatus.NOT_FOUND)
             return
@@ -254,6 +262,22 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         if error:
             return "", "", error
         return username, password, None
+    
+    def _handle_verify(self, payload):
+        username = payload.get('username', '')
+        password = payload.get('password', '')
+        
+        if not username or not password:
+            return {"ok": False, "message": "Username and password required"}
+        
+        # Connect to TCP server to verify credentials
+        client = TimetableClient(self._tcp_host, self._tcp_port, timeout=DEFAULT_TIMEOUT)
+        result = client.run_commands([f"LOGIN {username} {password}"])
+        
+        if result and result[0].get('ok', False):
+            return {"ok": True}
+        else:
+            return {"ok": False, "message": "Invalid credentials"}
 
 
 def main() -> None:

@@ -1,2 +1,2 @@
-# username:password
-admin:admin123
+username: admin
+password: admin123

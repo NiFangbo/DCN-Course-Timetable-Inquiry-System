@@ -40,16 +40,16 @@ cmake --build build --config Debug
 build\timetable_server.exe --port 54000
 ```
 
-5. 客户端
+5. 客户端（命令行，需先启动服务端）
 ```bash
 build\timetable_client.exe --host 127.0.0.1 --port 54000
 ```
 
-6. 网页端 GUI（需先启动服务端）
+6. 网页端（GUI，需先启动服务端）
 ```bash
 python web/web_server.py --host 127.0.0.1 --port 54000 --http-port 8080
 ```
-浏览器访问 `http://127.0.0.1:8080` 即可使用网页端 GUI。
+浏览器访问 `http://127.0.0.1:8080`。
 
 ## 通信协议
 ```

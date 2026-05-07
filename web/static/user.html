@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User - Timetable Inquiry</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Timetable Inquiry System</h1>
+            <p>User Mode - Query Only</p>
+        </header>
+
+        <div class="card">
+            <h2>Query Courses</h2>
+            <form id="query-form" class="grid">
+                <label>
+                    Query Type
+                    <select id="query-type">
+                        <option value="code">Course Code</option>
+                        <option value="instructor">Instructor</option>
+                        <option value="semester">Semester</option>
+                    </select>
+                </label>
+                <label>
+                    Keyword
+                    <input id="query-value" type="text" placeholder="e.g., COMP3003">
+                </label>
+                <div class="actions">
+                    <button type="submit">Search</button>
+                    <button type="button" id="list-all">List All</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Results</h2>
+            <div id="status" class="status"></div>
+            <div class="table-wrapper">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Title</th>
+                            <th>Section</th>
+                            <th>Instructor</th>
+                            <th>Time</th>
+                            <th>Classroom</th>
+                            <th>Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="back-btn">Back to Selection</button>
+        </div>
+    </div>
+
+    <script src="user.js"></script>
+</body>
+</html>
