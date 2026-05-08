@@ -1,4 +1,4 @@
-# DCN-Course-Timetable-Inquiry-System
+# Course Timetable Inquiry System
 ***Data Communication and Networking***
 
 ## Features
