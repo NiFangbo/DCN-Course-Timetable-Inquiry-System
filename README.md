@@ -72,10 +72,10 @@ Run in MSYS2 terminal or properly configured command prompt:
 ```
 
 **Optional Arguments**
-- `--port <port>` - Service port (default: 54000)
-- `--data <path>` - Data file path (default: data/timetable.csv)
-- `--admins <path>` - Admin file path (default: config/admins.txt)
-- `--log <path>` - Log file path (default: logs/server.log)
+- `--port `<port>`` - Service port (default: 54000)
+- `--data `<path>`` - Data file path (default: data/timetable.csv)
+- `--admins `<path>`` - Admin file path (default: config/admins.txt)
+- `--log `<path>`` - Log file path (default: logs/server.log)
 
 **Success Message**
 ```
@@ -145,14 +145,14 @@ Add more admins in the same format: `username:password`
 | Command | Format | Description |
 |---------|--------|-------------|
 | HELP | HELP | Show help |
-| QUERY | QUERY <code> | Query by course code |
-| QUERY_INSTRUCTOR | QUERY_INSTRUCTOR <name> | Query by instructor |
-| QUERY_SEMESTER | QUERY_SEMESTER <sem> | Query by semester |
+| QUERY | QUERY ``<code>`` | Query by course code |
+| QUERY_INSTRUCTOR | QUERY_INSTRUCTOR ``<name>`` | Query by instructor |
+| QUERY_SEMESTER | QUERY_SEMESTER `<sem>` | Query by semester |
 | LIST | LIST | List all courses |
-| LOGIN | LOGIN <user> <pwd> | Admin login |
-| ADD | ADD <code>|<title>|...|<sem> | Add course (requires login) |
-| UPDATE | UPDATE <code> <field> <val> | Update course (requires login) |
-| DELETE | DELETE <code> | Delete course (requires login) |
+| LOGIN | LOGIN `<user>` `<pwd>` | Admin login |
+| ADD | ADD `<code>`|`<title>`|...|`<sem>` | Add course (requires login) |
+| UPDATE | UPDATE `<code>` `<field>` `<val>` | Update course (requires login) |
+| DELETE | DELETE `<code>` | Delete course (requires login) |
 | LOGOUT | LOGOUT | Admin logout |
 | QUIT | QUIT | Exit client |
 
@@ -160,13 +160,13 @@ Add more admins in the same format: `username:password`
 
 | Response | Description |
 |----------|-------------|
-| RESULT <count> | Start of query result |
-| COURSE <field1>|<field2>... | Course data row |
+| RESULT `<count>` | Start of query result |
+| COURSE `<field1>`|`<field2>`... | Course data row |
 | END | End of result |
 | OK | Operation succeeded |
 | SUCCESS | Login succeeded |
 | FAILURE | Login failed |
-| ERROR <msg> | Error message |
+| ERROR `<msg>` | Error message |
 | BYE | Connection closed |
 
 ## Data Format
