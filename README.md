@@ -221,11 +221,12 @@ python web_server.py --port 54001
                                    ┌────────▼────────┐
 ┌─────────────────┐     TCP        │                 │
 │  C++ Client     │◄──────────────►│  C++ Server     │
-│  (Command-Line) │                │  timetable_server.exe │
-└─────────────────┘                └────────┬────────┘
+│ (命令行)         │                │ (timetable_     │
+└─────────────────┘                │  server.exe)    │
+                                   └────────┬────────┘
                                             │
                                    ┌────────▼────────┐
-                                   │   CSV Data File │
+                                   │   CSV 数据文件   │
                                    │  timetable.csv  │
                                    └─────────────────┘
 ```
