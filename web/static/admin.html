@@ -5,7 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Timetable Management</title>
     <link rel="stylesheet" href="app.css">
+    <style>
+        /* Add spacing between form inputs and action buttons */
+        .form-actions {
+            margin-top: 16px;
+        }
+        
+        /* Hide status bar when empty */
+        .status:empty {
+            display: none;
+        }
+            /* Fixed log panel at bottom */
+        .log-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            border-top: 2px solid #313244;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: #313244;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .log-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .log-header button {
+            background: transparent;
+            color: #cdd6f4;
+            border: 1px solid #45475a;
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+        
+        .log-content {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px 16px;
+            background: #1e1e2e;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #313244;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        
+        .log-entry.info { color: #89b4fa; }
+        .log-entry.warn { color: #f9e2af; }
+        .log-entry.error { color: #f38ba8; }
+        
+        .log-panel.collapsed .log-content {
+            display: none;
+        }
+        
+        /* Add padding to body to prevent content being hidden under log panel */
+        body {
+            padding-bottom: 250px;
+        }
+        
+        body.log-collapsed {
+            padding-bottom: 50px;
+        }
+    </style>
 </head>
+<script src="log-panel.js"></script>
 <body>
     <div class="container">
         <header>
@@ -74,8 +157,7 @@
                     <label>Classroom<input id="add-classroom" type="text"></label>
                     <label>Semester<input id="add-semester" type="text"></label>
                 </div>
-                <br>
-                <div class="actions">
+                <div class="actions form-actions">
                     <button type="submit">Add</button>
                 </div>
             </form>
@@ -98,8 +180,7 @@
                     </label>
                     <label>New Value<input id="update-value" type="text"></label>
                 </div>
-                <br>
-                <div class="actions">
+                <div class="actions form-actions">
                     <button type="submit">Update</button>
                 </div>
             </form>
@@ -110,16 +191,28 @@
                 <div class="grid">
                     <label>Code<input id="delete-code" type="text"></label>
                 </div>
-                <br>
-                <div class="actions">
+                <div class="actions form-actions">
                     <button type="submit" class="danger">Delete</button>
                 </div>
             </form>
 
-            <!-- Logout -->
+            <!-- Back to Selection -->
             <div class="actions">
-                <button id="logout-btn">Back to Selection</button>
+                <button id="back-btn">Back to Mode Selection</button>
             </div>
+        </div>
+    </div>
+
+    <div class="log-panel" id="log-panel">
+        <div class="log-header">
+            <h3>Server Logs <span id="log-count"></span></h3>
+            <div>
+                <button id="log-clear-btn">Clear</button>
+                <button id="log-toggle-btn">Collapse</button>
+            </div>
+        </div>
+        <div class="log-content" id="log-content">
+            <div class="log-entry">Waiting for logs...</div>
         </div>
     </div>
 

@@ -1,53 +1,85 @@
 // DOM elements
-const userCard = document.getElementById('user-card');
-const adminCard = document.getElementById('admin-card');
-const loginCard = document.getElementById('login-card');
 const userBtn = document.getElementById('user-btn');
 const adminBtn = document.getElementById('admin-btn');
+const loginCard = document.getElementById('login-card');
 const loginSubmitBtn = document.getElementById('login-submit-btn');
 const loginBackBtn = document.getElementById('login-back-btn');
 const loginUsername = document.getElementById('login-username');
 const loginPassword = document.getElementById('login-password');
 const loginStatus = document.getElementById('login-status');
 
-// Helper: set status message
+// Get the mode card containers - use more specific selectors
+const userModeCard = userBtn ? userBtn.parentElement : null;
+const adminModeCard = adminBtn ? adminBtn.parentElement : null;
+
 function setStatus(element, message, type) {
+    if (!element) return;
     element.textContent = message || '';
     element.className = 'status';
     if (type) {
         element.classList.add(type);
     }
+    if (!message) {
+        element.style.display = 'none';
+    } else {
+        element.style.display = 'block';
+    }
 }
 
-// Helper: clear status
 function clearStatus() {
     setStatus(loginStatus, '', '');
 }
 
-// Switch to user page
 function goToUserPage() {
     window.location.href = '/user.html';
 }
 
-// Show login form
 function showLoginForm() {
-    userCard.style.display = 'none';
-    adminCard.style.display = 'none';
-    loginCard.style.display = 'block';
+    // Hide the two mode buttons containers using direct parent access
+    if (userModeCard) {
+        userModeCard.style.display = 'none';
+    }
+    if (adminModeCard) {
+        adminModeCard.style.display = 'none';
+    }
+    
+    // Hide header to clean up view
+    const header = document.querySelector('header');
+    if (header) {
+        header.style.display = 'none';
+    }
+    
+    // Show login card
+    if (loginCard) {
+        loginCard.style.display = 'block';
+    }
     clearStatus();
-    loginUsername.value = '';
-    loginPassword.value = '';
+    if (loginUsername) loginUsername.value = '';
+    if (loginPassword) loginPassword.value = '';
 }
 
-// Hide login form, show selection cards
 function hideLoginForm() {
-    userCard.style.display = 'block';
-    adminCard.style.display = 'block';
-    loginCard.style.display = 'none';
+    // Show the two mode buttons containers
+    if (userModeCard) {
+        userModeCard.style.display = 'block';
+    }
+    if (adminModeCard) {
+        adminModeCard.style.display = 'block';
+    }
+    
+    // Show header again
+    const header = document.querySelector('header');
+    if (header) {
+        header.style.display = 'block';
+    }
+    
+    // Hide login card
+    if (loginCard) {
+        loginCard.style.display = 'none';
+    }
     clearStatus();
 }
 
-// Verify admin credentials with server
 async function verifyAdmin(username, password) {
     try {
         const response = await fetch('/api/verify', {
@@ -63,7 +95,6 @@ async function verifyAdmin(username, password) {
     }
 }
 
-// Handle login submission
 async function handleLogin() {
     const username = loginUsername.value.trim();
     const password = loginPassword.value.trim();
@@ -78,30 +109,55 @@ async function handleLogin() {
     const isValid = await verifyAdmin(username, password);
 
     if (isValid) {
-    // Store admin session info
         sessionStorage.setItem('adminUsername', username);
-        sessionStorage.setItem('adminPassword', password);  // Add this line
+        sessionStorage.setItem('adminPassword', password);
         sessionStorage.setItem('isAdminLoggedIn', 'true');
         window.location.href = '/admin.html';
-    }else {
+    } else {
         setStatus(loginStatus, 'Invalid username or password', 'error');
     }
 }
 
 // Event listeners
-userBtn.addEventListener('click', goToUserPage);
-adminBtn.addEventListener('click', showLoginForm);
-loginSubmitBtn.addEventListener('click', handleLogin);
-loginBackBtn.addEventListener('click', hideLoginForm);
+if (userBtn) {
+    userBtn.addEventListener('click', goToUserPage);
+}
 
-// Allow Enter key to submit login
-loginPassword.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleLogin();
-    }
-});
-loginUsername.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleLogin();
-    }
-});
+if (adminBtn) {
+    adminBtn.addEventListener('click', showLoginForm);
+}
+
+if (loginSubmitBtn) {
+    loginSubmitBtn.addEventListener('click', handleLogin);
+}
+
+if (loginBackBtn) {
+    loginBackBtn.addEventListener('click', hideLoginForm);
+}
+
+if (loginPassword) {
+    loginPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleLogin();
+        }
+    });
+}
+
+if (loginUsername) {
+    loginUsername.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleLogin();
+        }
+    });
+}
+
+// Initialize: hide status bar on page load
+if (loginStatus) {
+    loginStatus.style.display = 'none';
+}
+
+console.log('login.js loaded successfully');
+console.log('userModeCard found:', !!userModeCard);
+console.log('adminModeCard found:', !!adminModeCard);

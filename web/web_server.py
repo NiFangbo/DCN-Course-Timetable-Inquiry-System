@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -42,7 +41,7 @@ class TimetableClient:
             reader = SocketLineReader(sock)
             welcome = reader.read_line()
             if welcome is None:
-                return [{"ok": False, "message": "无法连接到服务器"} for _ in commands]
+                return [{"ok": False, "message": "Failed to connect to server"} for _ in commands]
             results = []
             for command in commands:
                 sock.sendall((command + "\n").encode("utf-8"))
@@ -52,13 +51,13 @@ class TimetableClient:
     def _read_response(self, reader: SocketLineReader) -> Dict[str, Any]:
         line = reader.read_line()
         if line is None:
-            return {"ok": False, "message": "连接已关闭"}
+            return {"ok": False, "message": "Connection closed"}
         if line.startswith("RESULT"):
             courses = []
             while True:
                 next_line = reader.read_line()
                 if next_line is None:
-                    return {"ok": False, "message": "连接已关闭"}
+                    return {"ok": False, "message": "Connection closed"}
                 if next_line == "END":
                     break
                 if next_line.startswith("COURSE "):
@@ -69,7 +68,7 @@ class TimetableClient:
         if line.startswith("ERROR "):
             return {"ok": False, "message": line[6:].strip()}
         if line == "FAILURE":
-            return {"ok": False, "message": "管理员账号或密码错误"}
+            return {"ok": False, "message": "Invalid admin username or password"}
         ok = line in {"OK", "SUCCESS", "BYE"}
         return {"ok": ok, "message": line}
 
@@ -97,16 +96,16 @@ def normalize_text(
     allow_space: bool = True,
 ) -> Tuple[Optional[str], Optional[str]]:
     if not isinstance(value, str):
-        return None, f"{field} 必须是字符串"
+        return None, f"{field} must be a string"
     text = value.strip()
     if not text:
-        return None, f"{field} 不能为空"
+        return None, f"{field} cannot be empty"
     if "\n" in text or "\r" in text:
-        return None, f"{field} 不能包含换行"
+        return None, f"{field} cannot contain newlines"
     if not allow_space and any(char.isspace() for char in text):
-        return None, f"{field} 不能包含空格"
+        return None, f"{field} cannot contain spaces"
     if not allow_pipe and "|" in text:
-        return None, f"{field} 不能包含 |"
+        return None, f"{field} cannot contain |"
     return text, None
 
 
@@ -117,7 +116,6 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, **kwargs)
         
     def do_GET(self):
-        # Redirect root path to login.html
         if self.path == "/" or self.path == "":
             self.path = "/login.html"
         return super().do_GET()
@@ -144,8 +142,10 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             response = self._handle_delete(payload)
         elif parsed.path == "/api/verify":
             response = self._handle_verify(payload)
+        elif parsed.path == "/api/logs":
+            response = self._handle_logs(payload)
         else:
-            self._send_json({"ok": False, "message": "未知接口"}, HTTPStatus.NOT_FOUND)
+            self._send_json({"ok": False, "message": "Unknown endpoint"}, HTTPStatus.NOT_FOUND)
             return
 
         status = HTTPStatus.OK if response.get("ok", False) else HTTPStatus.BAD_REQUEST
@@ -154,14 +154,14 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
     def _read_json(self) -> Tuple[Dict[str, Any], Optional[str]]:
         length = int(self.headers.get("Content-Length", "0") or "0")
         if length > MAX_BODY_BYTES:
-            return {}, "请求体过大"
+            return {}, "Request body too large"
         if length == 0:
             return {}, None
         raw = self.rfile.read(length)
         try:
             return json.loads(raw.decode("utf-8")), None
         except json.JSONDecodeError:
-            return {}, "JSON 格式错误"
+            return {}, "Invalid JSON format"
 
     def _send_json(self, payload: Dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
         data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -182,14 +182,14 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             [f"LOGIN {username} {password}", command]
         )
         if not login_response.get("ok", False):
-            return {"ok": False, "message": login_response.get("message", "管理员登录失败")}
+            return {"ok": False, "message": login_response.get("message", "Admin login failed")}
         return action_response
 
     def _handle_query(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        query_type, error = normalize_text(payload.get("type"), "查询类型")
+        query_type, error = normalize_text(payload.get("type"), "Query type")
         if error:
             return {"ok": False, "message": error}
-        value, error = normalize_text(payload.get("value"), "查询关键字")
+        value, error = normalize_text(payload.get("value"), "Query keyword")
         if error:
             return {"ok": False, "message": error}
         if query_type == "code":
@@ -198,7 +198,7 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             return self._run_command(f"QUERY_INSTRUCTOR {value}")
         if query_type == "semester":
             return self._run_command(f"QUERY_SEMESTER {value}")
-        return {"ok": False, "message": "不支持的查询类型"}
+        return {"ok": False, "message": "Unsupported query type"}
 
     def _handle_add(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         username, password, error = self._read_admin(payload)
@@ -207,13 +207,13 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         course = payload.get("course", {})
         fields = []
         labeled_fields = [
-            ("code", "课程代码", False),
-            ("title", "课程名称", True),
-            ("section", "班级", True),
-            ("instructor", "教师", True),
-            ("time", "时间", True),
-            ("classroom", "教室", True),
-            ("semester", "学期", True),
+            ("code", "Course code", False),
+            ("title", "Course title", True),
+            ("section", "Section", True),
+            ("instructor", "Instructor", True),
+            ("time", "Time", True),
+            ("classroom", "Classroom", True),
+            ("semester", "Semester", True),
         ]
         for key, label, allow_space in labeled_fields:
             value, error = normalize_text(
@@ -229,16 +229,16 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         username, password, error = self._read_admin(payload)
         if error:
             return {"ok": False, "message": error}
-        code, error = normalize_text(payload.get("code"), "课程代码", allow_space=False)
+        code, error = normalize_text(payload.get("code"), "Course code", allow_space=False)
         if error:
             return {"ok": False, "message": error}
-        field, error = normalize_text(payload.get("field"), "字段", allow_space=False)
+        field, error = normalize_text(payload.get("field"), "Field", allow_space=False)
         if error:
             return {"ok": False, "message": error}
         field = field.lower()
         if field not in ALLOWED_UPDATE_FIELDS:
-            return {"ok": False, "message": "字段不支持"}
-        value, error = normalize_text(payload.get("value"), "新值")
+            return {"ok": False, "message": "Field not supported"}
+        value, error = normalize_text(payload.get("value"), "New value")
         if error:
             return {"ok": False, "message": error}
         command = f"UPDATE {code} {field} {value}"
@@ -248,21 +248,21 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         username, password, error = self._read_admin(payload)
         if error:
             return {"ok": False, "message": error}
-        code, error = normalize_text(payload.get("code"), "课程代码", allow_space=False)
+        code, error = normalize_text(payload.get("code"), "Course code", allow_space=False)
         if error:
             return {"ok": False, "message": error}
         return self._run_admin_command(username, password, f"DELETE {code}")
 
     def _read_admin(self, payload: Dict[str, Any]) -> Tuple[str, str, Optional[str]]:
         admin = payload.get("admin", {})
-        username, error = normalize_text(admin.get("username"), "管理员账号", allow_space=False)
+        username, error = normalize_text(admin.get("username"), "Admin username", allow_space=False)
         if error:
             return "", "", error
-        password, error = normalize_text(admin.get("password"), "管理员密码", allow_space=False)
+        password, error = normalize_text(admin.get("password"), "Admin password", allow_space=False)
         if error:
             return "", "", error
         return username, password, None
-    
+        
     def _handle_verify(self, payload):
         username = payload.get('username', '')
         password = payload.get('password', '')
@@ -270,7 +270,6 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
         if not username or not password:
             return {"ok": False, "message": "Username and password required"}
         
-        # Connect to TCP server to verify credentials
         client = TimetableClient(self._tcp_host, self._tcp_port, timeout=DEFAULT_TIMEOUT)
         result = client.run_commands([f"LOGIN {username} {password}"])
         
@@ -278,6 +277,29 @@ class TimetableRequestHandler(SimpleHTTPRequestHandler):
             return {"ok": True}
         else:
             return {"ok": False, "message": "Invalid credentials"}
+    
+    def _handle_logs(self, payload):
+        current_dir = Path(__file__).parent
+        log_file = current_dir.parent / "logs" / "server.log"
+        
+        if not log_file.exists():
+            return {"ok": True, "logs": []}
+        
+        try:
+            with open(log_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            
+            last_lines = lines[-50:] if len(lines) > 50 else lines
+            
+            logs = []
+            for line in last_lines:
+                line = line.strip()
+                if line:
+                    logs.append(line)
+            
+            return {"ok": True, "logs": logs}
+        except Exception as e:
+            return {"ok": True, "logs": [f"Error reading log: {e}"]}
 
 
 def main() -> None:

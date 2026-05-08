@@ -5,27 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timetable Inquiry System</title>
     <link rel="stylesheet" href="app.css">
+    <style>
+        /* Reset body margin to ensure full centering */
+        body {
+            margin: 0;
+            background: #f6f7fb;
+        }
+
+        /* Container for full-screen centering */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Header styling */
+        header {
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 8px;
+            color: #1f2937;
+        }
+
+        /* Card wrapper for buttons to ensure consistent width and centering */
+        .mode-card {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 24px auto;
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        /* Custom button styling */
+        .mode-btn {
+            width: 100%;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: transparent;
+            color: #1f2937;
+            border: 2px solid #d1d8e3;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .mode-btn:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* Login card styling */
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .login-card .grid {
+            margin-bottom: 20px;
+        }
+                .log-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            border-top: 2px solid #313244;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: #313244;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .log-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .log-header button {
+            background: transparent;
+            color: #cdd6f4;
+            border: 1px solid #45475a;
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+        
+        .log-content {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px 16px;
+            background: #1e1e2e;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #313244;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        
+        .log-entry.info { color: #89b4fa; }
+        .log-entry.warn { color: #f9e2af; }
+        .log-entry.error { color: #f38ba8; }
+        
+        .log-panel.collapsed .log-content {
+            display: none;
+        }
+        
+        /* Add padding to body to prevent content being hidden under log panel */
+        body {
+            padding-bottom: 250px;
+        }
+        
+        body.log-collapsed {
+            padding-bottom: 50px;
+        }
+    </style>
 </head>
+<script src="log-panel.js"></script>
 <body>
     <div class="container">
         <header>
             <h1>Timetable Inquiry System</h1>
-            <p>Select your access mode</p>
         </header>
 
-        <div class="card" id="user-card">
-            <h2>User Mode</h2>
-            <p>Query course schedules without login</p>
-            <button id="user-btn">Enter as User</button>
+        <div class="mode-card">
+            <button id="user-btn" class="mode-btn">Login as Normal User</button>
         </div>
 
-        <div class="card" id="admin-card">
-            <h2>Admin Mode</h2>
-            <p>Manage courses with administrator account</p>
-            <button id="admin-btn">Enter as Admin</button>
+        <div class="mode-card">
+            <button id="admin-btn" class="mode-btn">Login as Admin</button>
         </div>
 
-        <div class="card" id="login-card" style="display: none;">
+        <div id="login-card" class="card login-card" style="display: none;">
             <h2>Admin Login</h2>
             <div id="login-status" class="status"></div>
             <div class="grid">
@@ -38,11 +179,23 @@
                     <input type="password" id="login-password" placeholder="password">
                 </label>
             </div>
-            <br>
             <div class="actions">
                 <button id="login-submit-btn">Login</button>
                 <button id="login-back-btn">Back</button>
             </div>
+        </div>
+    </div>
+
+    <div class="log-panel" id="log-panel">
+        <div class="log-header">
+            <h3>Server Logs <span id="log-count"></span></h3>
+            <div>
+                <button id="log-clear-btn">Clear</button>
+                <button id="log-toggle-btn">Collapse</button>
+            </div>
+        </div>
+        <div class="log-content" id="log-content">
+            <div class="log-entry">Waiting for logs...</div>
         </div>
     </div>
 

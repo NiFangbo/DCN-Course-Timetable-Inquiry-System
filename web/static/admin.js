@@ -12,10 +12,17 @@ if (!isAdminLoggedIn || !adminUsername) {
 }
 
 function setStatus(element, message, type) {
+    if (!element) return;
     element.textContent = message || "";
     element.classList.remove("error", "success");
-    if (type) {
-        element.classList.add(type);
+    
+    if (!message) {
+        element.style.display = 'none';
+    } else {
+        element.style.display = 'block';
+        if (type) {
+            element.classList.add(type);
+        }
     }
 }
 
@@ -68,6 +75,11 @@ async function performQuery(type, value) {
         const data = await apiPost("/api/query", { type, value });
         renderCourses(data.courses || []);
         setStatus(statusEl, `Found ${data.count || 0} result(s)`, "success");
+        setTimeout(() => {
+            if (statusEl.textContent === `Found ${data.count || 0} result(s)`) {
+                setStatus(statusEl, "", "");
+            }
+        }, 3000);
     } catch (error) {
         renderCourses([]);
         setStatus(statusEl, error.message, "error");
@@ -80,6 +92,11 @@ async function listAll() {
         const data = await apiPost("/api/list", {});
         renderCourses(data.courses || []);
         setStatus(statusEl, `Found ${data.count || 0} course(s)`, "success");
+        setTimeout(() => {
+            if (statusEl.textContent === `Found ${data.count || 0} course(s)`) {
+                setStatus(statusEl, "", "");
+            }
+        }, 3000);
     } catch (error) {
         renderCourses([]);
         setStatus(statusEl, error.message, "error");
@@ -142,113 +159,150 @@ async function deleteCourse(code) {
     return data;
 }
 
-function logout() {
+function goBack() {
+    // Clear admin session and return to selection page
     sessionStorage.removeItem('isAdminLoggedIn');
     sessionStorage.removeItem('adminUsername');
     sessionStorage.removeItem('adminPassword');
     window.location.href = '/';
 }
 
-function goBack() {
-    window.location.href = '/';
+// Query event listeners
+const queryForm = document.getElementById("query-form");
+const listAllBtn = document.getElementById("list-all");
+
+if (queryForm) {
+    queryForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const type = document.getElementById("query-type").value;
+        const value = document.getElementById("query-value").value.trim();
+        await performQuery(type, value);
+    });
 }
 
-// Event listeners for queries
-document.getElementById("query-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const type = document.getElementById("query-type").value;
-    const value = document.getElementById("query-value").value.trim();
-    await performQuery(type, value);
-});
+if (listAllBtn) {
+    listAllBtn.addEventListener("click", async () => {
+        await listAll();
+    });
+}
 
-document.getElementById("list-all").addEventListener("click", async () => {
-    await listAll();
-});
-
-// Event listeners for admin actions
-document.getElementById("add-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const course = {
-        code: document.getElementById("add-code").value.trim(),
-        title: document.getElementById("add-title").value.trim(),
-        section: document.getElementById("add-section").value.trim(),
-        instructor: document.getElementById("add-instructor").value.trim(),
-        time: document.getElementById("add-time").value.trim(),
-        classroom: document.getElementById("add-classroom").value.trim(),
-        semester: document.getElementById("add-semester").value.trim()
-    };
-    
-    setStatus(adminStatusEl, "Adding course...", "");
-    try {
-        const result = await addCourse(course);
-        if (result.ok) {
-            setStatus(adminStatusEl, "Course added successfully", "success");
-            document.getElementById("add-form").reset();
-            await listAll();
-        } else {
-            setStatus(adminStatusEl, result.message || "Failed to add course", "error");
+// Admin action event listeners
+const addForm = document.getElementById("add-form");
+if (addForm) {
+    addForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const course = {
+            code: document.getElementById("add-code").value.trim(),
+            title: document.getElementById("add-title").value.trim(),
+            section: document.getElementById("add-section").value.trim(),
+            instructor: document.getElementById("add-instructor").value.trim(),
+            time: document.getElementById("add-time").value.trim(),
+            classroom: document.getElementById("add-classroom").value.trim(),
+            semester: document.getElementById("add-semester").value.trim()
+        };
+        
+        setStatus(adminStatusEl, "Adding course...", "");
+        try {
+            const result = await addCourse(course);
+            if (result.ok) {
+                setStatus(adminStatusEl, "Course added successfully", "success");
+                addForm.reset();
+                await listAll();
+                setTimeout(() => {
+                    if (adminStatusEl.textContent === "Course added successfully") {
+                        setStatus(adminStatusEl, "", "");
+                    }
+                }, 3000);
+            } else {
+                setStatus(adminStatusEl, result.message || "Failed to add course", "error");
+            }
+        } catch (error) {
+            setStatus(adminStatusEl, error.message, "error");
         }
-    } catch (error) {
-        setStatus(adminStatusEl, error.message, "error");
-    }
-});
+    });
+}
 
-document.getElementById("update-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const code = document.getElementById("update-code").value.trim();
-    const field = document.getElementById("update-field").value;
-    const value = document.getElementById("update-value").value.trim();
-    
-    if (!code || !value) {
-        setStatus(adminStatusEl, "Please enter both code and new value", "error");
-        return;
-    }
-    
-    setStatus(adminStatusEl, "Updating course...", "");
-    try {
-        const result = await updateCourse(code, field, value);
-        if (result.ok) {
-            setStatus(adminStatusEl, "Course updated successfully", "success");
-            document.getElementById("update-form").reset();
-            await listAll();
-        } else {
-            setStatus(adminStatusEl, result.message || "Failed to update course", "error");
+const updateForm = document.getElementById("update-form");
+if (updateForm) {
+    updateForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const code = document.getElementById("update-code").value.trim();
+        const field = document.getElementById("update-field").value;
+        const value = document.getElementById("update-value").value.trim();
+        
+        if (!code || !value) {
+            setStatus(adminStatusEl, "Please enter both code and new value", "error");
+            return;
         }
-    } catch (error) {
-        setStatus(adminStatusEl, error.message, "error");
-    }
-});
-
-document.getElementById("delete-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const code = document.getElementById("delete-code").value.trim();
-    
-    if (!code) {
-        setStatus(adminStatusEl, "Please enter course code", "error");
-        return;
-    }
-    
-    if (!confirm(`Are you sure you want to delete course ${code}?`)) {
-        return;
-    }
-    
-    setStatus(adminStatusEl, "Deleting course...", "");
-    try {
-        const result = await deleteCourse(code);
-        if (result.ok) {
-            setStatus(adminStatusEl, "Course deleted successfully", "success");
-            document.getElementById("delete-form").reset();
-            await listAll();
-        } else {
-            setStatus(adminStatusEl, result.message || "Failed to delete course", "error");
+        
+        setStatus(adminStatusEl, "Updating course...", "");
+        try {
+            const result = await updateCourse(code, field, value);
+            if (result.ok) {
+                setStatus(adminStatusEl, "Course updated successfully", "success");
+                updateForm.reset();
+                await listAll();
+                setTimeout(() => {
+                    if (adminStatusEl.textContent === "Course updated successfully") {
+                        setStatus(adminStatusEl, "", "");
+                    }
+                }, 3000);
+            } else {
+                setStatus(adminStatusEl, result.message || "Failed to update course", "error");
+            }
+        } catch (error) {
+            setStatus(adminStatusEl, error.message, "error");
         }
-    } catch (error) {
-        setStatus(adminStatusEl, error.message, "error");
-    }
-});
+    });
+}
 
-document.getElementById("logout-btn").addEventListener("click", logout);
-document.getElementById("back-btn").addEventListener("click", goBack);
+const deleteForm = document.getElementById("delete-form");
+if (deleteForm) {
+    deleteForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const code = document.getElementById("delete-code").value.trim();
+        
+        if (!code) {
+            setStatus(adminStatusEl, "Please enter course code", "error");
+            return;
+        }
+        
+        if (!confirm(`Are you sure you want to delete course ${code}?`)) {
+            return;
+        }
+        
+        setStatus(adminStatusEl, "Deleting course...", "");
+        try {
+            const result = await deleteCourse(code);
+            if (result.ok) {
+                setStatus(adminStatusEl, "Course deleted successfully", "success");
+                deleteForm.reset();
+                await listAll();
+                setTimeout(() => {
+                    if (adminStatusEl.textContent === "Course deleted successfully") {
+                        setStatus(adminStatusEl, "", "");
+                    }
+                }, 3000);
+            } else {
+                setStatus(adminStatusEl, result.message || "Failed to delete course", "error");
+            }
+        } catch (error) {
+            setStatus(adminStatusEl, error.message, "error");
+        }
+    });
+}
+
+// Back button - ensure it exists and works
+const backBtn = document.getElementById("back-btn");
+if (backBtn) {
+    backBtn.addEventListener("click", goBack);
+} else {
+    console.error("back-btn not found in admin.html");
+}
+
+// Initialize: hide status bars on page load
+setStatus(statusEl, "", "");
+setStatus(adminStatusEl, "", "");
 
 // Load all courses on page load
 listAll();
