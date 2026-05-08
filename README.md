@@ -133,8 +133,8 @@ Requires login. Additional functions:
 ### Default Admin Account
 Stored in `config/admins.txt`:
 ```
-# username:password
-admin:admin123
+username: admin
+password: admin123
 ```
 Add more admins in the same format: `username:password`
 
