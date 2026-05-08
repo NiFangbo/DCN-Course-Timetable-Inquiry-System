@@ -72,10 +72,10 @@ Run in MSYS2 terminal or properly configured command prompt:
 ```
 
 **Optional Arguments**
-- `--port `<port>`` - Service port (default: 54000)
-- `--data `<path>`` - Data file path (default: data/timetable.csv)
-- `--admins `<path>`` - Admin file path (default: config/admins.txt)
-- `--log `<path>`` - Log file path (default: logs/server.log)
+- `--port ` `<port>` - Service port (default: 54000)
+- `--data` `<path>` - Data file path (default: data/timetable.csv)
+- `--admins` `<path>` - Admin file path (default: config/admins.txt)
+- `--log` `<path>` - Log file path (default: logs/server.log)
 
 **Success Message**
 ```
