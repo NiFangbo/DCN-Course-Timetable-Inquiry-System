@@ -47,6 +47,11 @@
 | C++ Compiler | MinGW-w64 / MSVC |
 | Python    | 3.7 or higher   |
 
+## Quick Start
+```bash
+python launcher.py
+```
+
 ## Build Steps
 
 ### 1. Generate Build Files
