@@ -1,0 +1,77 @@
+{
+    "baseURL": "http://127.0.0.1:8080",
+    "title": "Course Timetable Inquiry System",
+    "description": "Data Communication and Networking Project",
+    
+    "environment": {
+        "cmake": {
+            "minimumVersion": "3.20",
+            "generator": "MinGW Makefiles",
+            "buildType": "Debug"
+        },
+        "cppCompiler": ["MinGW-w64", "MSVC"],
+        "python": {
+            "minimumVersion": "3.7"
+        }
+    },
+
+    "params": {
+        "projectRoot": "./",
+        "buildDir": "build",
+        "sourceDir": "src",
+        "webDir": "web",
+        
+        "server": {
+            "executable": "timetable_server.exe",
+            "port": 54000,
+            "dataPath": "data/timetable.csv",
+            "adminsPath": "config/admins.txt",
+            "logPath": "logs/server.log"
+        },
+
+        "webGui": {
+            "script": "web_server.py",
+            "host": "127.0.0.1",
+            "port": 54000,
+            "httpPort": 8080,
+            "bindAddress": "127.0.0.1"
+        }
+    },
+
+    "startupTasks": {
+        "build": [
+            {
+                "name": "Configure CMake",
+                "command": "cmake -S . -B ${params.buildDir} -G \"${environment.cmake.generator}\" -DCMAKE_BUILD_TYPE=${environment.cmake.buildType}"
+            },
+            {
+                "name": "Compile Project",
+                "command": "cmake --build ${params.buildDir}"
+            }
+        ],
+        "run": [
+            {
+                "name": "Timetable Server",
+                "target": "${params.buildDir}/${params.server.executable}",
+                "args": [
+                    "--port", "${params.server.port}",
+                    "--data", "${params.projectRoot}/${params.server.dataPath}",
+                    "--admins", "${params.projectRoot}/${params.server.adminsPath}",
+                    "--log", "${params.projectRoot}/${params.server.logPath}"
+                ],
+                "waitSeconds": 2
+            },
+            {
+                "name": "Web GUI Server",
+                "target": "python",
+                "args": [
+                    "${params.webDir}/${params.webGui.script}",
+                    "--host", "${params.webGui.host}",
+                    "--port", "${params.webGui.port}",
+                    "--http-port", "${params.webGui.httpPort}"
+                ],
+                "waitSeconds": 1
+            }
+        ]
+    }
+}
