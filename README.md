@@ -166,7 +166,7 @@ Add more admins in the same format: `username:password`
 | Response | Description |
 |----------|-------------|
 | RESULT `<count>` | Start of query result |
-| COURSE `<field1>`|`<field2>`... | Course data row |
+| COURSE `<field1><field2>`... | Course data row |
 | END | End of result |
 | OK | Operation succeeded |
 | SUCCESS | Login succeeded |
